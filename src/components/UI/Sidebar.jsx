@@ -1,4 +1,5 @@
-import { Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Settings, ChevronLeft, ChevronRight, Zap, ZapOff } from 'lucide-react';
 import { useAppStore, PRESETS } from '../../stores/appStore';
 import { useImageProcessor } from '../../hooks/useImageProcessor';
 import { useImageStore } from '../../stores/imageStore';
@@ -40,6 +41,10 @@ function Sidebar() {
   const setProcessedImageData = useImageStore((state) => state.setProcessedImageData);
   const setVectorData = useImageStore((state) => state.setVectorData);
 
+  // Auto-process toggle
+  const [autoProcess, setAutoProcess] = useState(true);
+  const debounceTimerRef = useRef(null);
+
   const handleProcess = async () => {
     if (!originalImageData || !isReady) return;
 
@@ -79,6 +84,27 @@ function Sidebar() {
     }
   };
 
+  // Auto-process when parameters change
+  useEffect(() => {
+    if (!autoProcess || !originalImageData || !isReady) return;
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer (debounce 500ms)
+    debounceTimerRef.current = setTimeout(() => {
+      handleProcess();
+    }, 500);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [threshold, morphologySize, morphologyIterations, blurSize, autoProcess, originalImageData, isReady]);
+
   if (!leftPanelOpen) {
     return (
       <button
@@ -102,6 +128,31 @@ function Sidebar() {
           <button onClick={() => setLeftPanelOpen(false)} className="toolbar-button">
             <ChevronLeft size={20} />
           </button>
+        </div>
+
+        {/* Auto-Process Toggle */}
+        <div className="mb-4 p-3 bg-gray-700 rounded-lg">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              {autoProcess ? <Zap size={16} className="text-yellow-500" /> : <ZapOff size={16} />}
+              Auto Preview
+            </span>
+            <button
+              onClick={() => setAutoProcess(!autoProcess)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                autoProcess ? 'bg-primary-600' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  autoProcess ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </label>
+          <p className="text-xs text-gray-400 mt-1">
+            {autoProcess ? 'Parameters update in real-time' : 'Click "Process Image" to apply changes'}
+          </p>
         </div>
 
         {/* Presets */}
