@@ -91,6 +91,13 @@ export const useAppStore = create((set, get) => ({
   smoothness: 0.5, // 0-1, for RDP algorithm epsilon
   setSmoothness: (smoothness) => set({ smoothness, preset: PRESETS.CUSTOM }),
 
+  // Smart cleanup settings
+  removeSmallObjects: true,
+  setRemoveSmallObjects: (enabled) => set({ removeSmallObjects: enabled }),
+
+  minObjectSize: 200, // Minimum object size to keep (pixels²)
+  setMinObjectSize: (size) => set({ minObjectSize: size }),
+
   // Ortho correction settings
   orthoEnabled: true,
   setOrthoEnabled: (enabled) => set({ orthoEnabled: enabled }),

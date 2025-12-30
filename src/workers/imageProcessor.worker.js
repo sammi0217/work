@@ -190,6 +190,48 @@ function findContours(imageData, smoothness = 0.5) {
 }
 
 /**
+ * Remove small connected components (text, symbols, small objects)
+ */
+function removeSmallComponents(imageData, minSize = 100) {
+  const src = cv.matFromImageData(imageData);
+  const labels = new cv.Mat();
+  const stats = new cv.Mat();
+  const centroids = new cv.Mat();
+
+  // Find all connected components
+  const numLabels = cv.connectedComponentsWithStats(src, labels, stats, centroids, 8, cv.CV_32S);
+
+  // Create output (start with white/background)
+  const dst = new cv.Mat(src.rows, src.cols, cv.CV_8UC1, new cv.Scalar(255));
+
+  // Keep only large components
+  for (let i = 1; i < numLabels; i++) {
+    const area = stats.intAt(i, cv.CC_STAT_AREA);
+
+    if (area >= minSize) {
+      // Keep this component - copy it to dst
+      for (let y = 0; y < labels.rows; y++) {
+        for (let x = 0; x < labels.cols; x++) {
+          if (labels.intAt(y, x) === i) {
+            dst.ucharPtr(y, x)[0] = 0; // Set to black
+          }
+        }
+      }
+    }
+  }
+
+  const result = imageDataFromMat(dst);
+
+  src.delete();
+  labels.delete();
+  stats.delete();
+  centroids.delete();
+  dst.delete();
+
+  return result;
+}
+
+/**
  * Complete image processing pipeline
  */
 function processImage(imageData, params) {
@@ -198,14 +240,20 @@ function processImage(imageData, params) {
   // Step 1: Blur (if needed)
   if (params.blurSize > 0) {
     result = applyBlur(result, params.blurSize);
-    postMessage({ type: 'progress', progress: 20 });
+    postMessage({ type: 'progress', progress: 15 });
   }
 
   // Step 2: Threshold
   result = applyThreshold(result, params.threshold);
-  postMessage({ type: 'progress', progress: 40 });
+  postMessage({ type: 'progress', progress: 30 });
 
-  // Step 3: Morphology (Closing to connect gaps)
+  // Step 3: Remove small components (text, symbols) - SMART CLEANUP
+  if (params.removeSmallObjects && params.minObjectSize > 0) {
+    result = removeSmallComponents(result, params.minObjectSize);
+    postMessage({ type: 'progress', progress: 60 });
+  }
+
+  // Step 4: Morphology (Closing to connect gaps)
   if (params.morphologySize > 0 && params.morphologyIterations > 0) {
     result = applyMorphology(
       result,
@@ -213,7 +261,7 @@ function processImage(imageData, params) {
       params.morphologySize,
       params.morphologyIterations
     );
-    postMessage({ type: 'progress', progress: 60 });
+    postMessage({ type: 'progress', progress: 85 });
   }
 
   postMessage({ type: 'progress', progress: 100 });

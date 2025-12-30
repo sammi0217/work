@@ -39,6 +39,12 @@ function Sidebar() {
   const brushSize = useAppStore((state) => state.brushSize);
   const setBrushSize = useAppStore((state) => state.setBrushSize);
 
+  const removeSmallObjects = useAppStore((state) => state.removeSmallObjects);
+  const setRemoveSmallObjects = useAppStore((state) => state.setRemoveSmallObjects);
+
+  const minObjectSize = useAppStore((state) => state.minObjectSize);
+  const setMinObjectSize = useAppStore((state) => state.setMinObjectSize);
+
   const { processImage, findContours, isReady } = useImageProcessor();
   const originalImageData = useImageStore((state) => state.originalImageData);
   const setProcessedImageData = useImageStore((state) => state.setProcessedImageData);
@@ -58,6 +64,8 @@ function Sidebar() {
         morphologyIterations,
         blurSize,
         smoothness,
+        removeSmallObjects,
+        minObjectSize,
       };
 
       const processed = await processImage(originalImageData, params);
@@ -260,6 +268,68 @@ function Sidebar() {
             className="w-full"
           />
           <p className="text-xs text-gray-400 mt-1">Higher = smoother paths, fewer points</p>
+        </div>
+
+        {/* Smart Cleanup - KEY FEATURE */}
+        <div className="mb-6 p-3 bg-gradient-to-r from-green-900/30 to-green-800/30 border border-green-700 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-green-300">🎯 Smart Cleanup</label>
+            <button
+              onClick={() => setRemoveSmallObjects(!removeSmallObjects)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                removeSmallObjects ? 'bg-green-600' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  removeSmallObjects ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-xs text-green-200 mb-3">Auto-remove text, symbols, and small objects</p>
+
+          <label className="block text-sm font-medium mb-2">
+            Min Size: <span className="text-green-300">{minObjectSize}px²</span>
+          </label>
+          <input
+            type="range"
+            min="50"
+            max="1000"
+            step="50"
+            value={minObjectSize}
+            onChange={(e) => setMinObjectSize(Number(e.target.value))}
+            className="w-full"
+            disabled={!removeSmallObjects}
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Lower = remove smaller objects (text, symbols)
+            <br />
+            Higher = keep more details
+          </p>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={() => setMinObjectSize(100)}
+              className="btn btn-secondary text-xs px-2 py-1"
+              disabled={!removeSmallObjects}
+            >
+              Aggressive
+            </button>
+            <button
+              onClick={() => setMinObjectSize(300)}
+              className="btn btn-secondary text-xs px-2 py-1"
+              disabled={!removeSmallObjects}
+            >
+              Balanced
+            </button>
+            <button
+              onClick={() => setMinObjectSize(600)}
+              className="btn btn-secondary text-xs px-2 py-1"
+              disabled={!removeSmallObjects}
+            >
+              Conservative
+            </button>
+          </div>
         </div>
 
         {/* Ortho Correction */}
