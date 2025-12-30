@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Settings, ChevronLeft, ChevronRight, Zap, ZapOff } from 'lucide-react';
+import { Settings, ChevronLeft, ChevronRight, Zap, ZapOff, Trash2 } from 'lucide-react';
 import { useAppStore, PRESETS } from '../../stores/appStore';
 import { useImageProcessor } from '../../hooks/useImageProcessor';
 import { useImageStore } from '../../stores/imageStore';
@@ -84,6 +84,17 @@ function Sidebar() {
     } catch (error) {
       console.error('Vectorization error:', error);
       alert('Error vectorizing image: ' + error.message);
+    }
+  };
+
+  const handleClearEraser = () => {
+    // Trigger a page reload to clear eraser marks
+    // This will reset the MaskLayer component
+    window.dispatchEvent(new CustomEvent('clearEraserMarks'));
+
+    // Re-process the image
+    if (autoProcess && originalImageData && isReady) {
+      handleProcess();
     }
   };
 
@@ -293,6 +304,13 @@ function Sidebar() {
               Large
             </button>
           </div>
+          <button
+            onClick={handleClearEraser}
+            className="mt-2 btn btn-secondary w-full text-xs flex items-center justify-center gap-1"
+          >
+            <Trash2 size={14} />
+            Clear Eraser Marks
+          </button>
         </div>
 
         {/* Action Buttons */}
