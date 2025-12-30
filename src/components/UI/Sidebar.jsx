@@ -36,6 +36,9 @@ function Sidebar() {
   const orthoThreshold = useAppStore((state) => state.orthoThreshold);
   const setOrthoThreshold = useAppStore((state) => state.setOrthoThreshold);
 
+  const brushSize = useAppStore((state) => state.brushSize);
+  const setBrushSize = useAppStore((state) => state.setBrushSize);
+
   const { processImage, findContours, isReady } = useImageProcessor();
   const originalImageData = useImageStore((state) => state.originalImageData);
   const setProcessedImageData = useImageStore((state) => state.setProcessedImageData);
@@ -263,6 +266,33 @@ function Sidebar() {
             disabled={!orthoEnabled}
           />
           <p className="text-xs text-gray-400 mt-1">Snap lines to 90° if within threshold</p>
+        </div>
+
+        {/* Brush Size (for Eraser) */}
+        <div className="mb-6 p-3 bg-gray-700 rounded-lg">
+          <label className="block text-sm font-medium mb-2">
+            Eraser Brush Size: <span className="text-primary-400">{brushSize}px</span>
+          </label>
+          <input
+            type="range"
+            min="5"
+            max="100"
+            value={brushSize}
+            onChange={(e) => setBrushSize(Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="text-xs text-gray-400 mt-1">Adjust eraser brush size</p>
+          <div className="mt-2 flex gap-2">
+            <button onClick={() => setBrushSize(10)} className="btn btn-secondary text-xs px-2 py-1">
+              Small
+            </button>
+            <button onClick={() => setBrushSize(30)} className="btn btn-secondary text-xs px-2 py-1">
+              Medium
+            </button>
+            <button onClick={() => setBrushSize(60)} className="btn btn-secondary text-xs px-2 py-1">
+              Large
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}

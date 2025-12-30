@@ -4,6 +4,7 @@ import { useCanvasStore } from '../../stores/canvasStore';
 import { useImageStore } from '../../stores/imageStore';
 import { useAppStore, TOOLS } from '../../stores/appStore';
 import BackgroundLayer from './BackgroundLayer';
+import MaskLayer from './MaskLayer';
 import VectorLayer from './VectorLayer';
 import ToolsLayer from './ToolsLayer';
 
@@ -154,6 +155,11 @@ function Canvas() {
         {/* Background Layer */}
         <Layer>
           <BackgroundLayer />
+        </Layer>
+
+        {/* Mask/Erase Layer */}
+        <Layer>
+          <MaskLayer />
         </Layer>
 
         {/* Vector Layer */}
