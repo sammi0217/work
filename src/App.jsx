@@ -1,14 +1,40 @@
+import { Routes, Route } from 'react-router-dom';
 import Toolbar from './components/Toolbar/Toolbar';
 import Canvas from './components/Canvas/Canvas';
 import Sidebar from './components/UI/Sidebar';
 import { useAppStore } from './stores/appStore';
+import LibraryEntry from './pages/library/LibraryEntry';
+import LoginPage from './pages/library/LoginPage';
+import CardStatusPage from './pages/library/CardStatusPage';
+import ScanPage from './pages/library/ScanPage';
+import BorrowRecordsPage from './pages/library/BorrowRecordsPage';
 
 /**
  * Main Application Component
  *
  * Floorplan SVG Pro - Professional floor plan vectorization tool
+ * with integrated Library Borrowing System
  */
 function App() {
+  return (
+    <Routes>
+      {/* Floorplan tool (original app) */}
+      <Route path="/" element={<FloorplanApp />} />
+
+      {/* Library borrowing flow */}
+      <Route path="/library" element={<LibraryEntry />} />
+      <Route path="/library/login" element={<LoginPage />} />
+      <Route path="/library/card-check" element={<CardStatusPage />} />
+      <Route path="/library/scan" element={<ScanPage />} />
+      <Route path="/library/records" element={<BorrowRecordsPage />} />
+    </Routes>
+  );
+}
+
+/**
+ * FloorplanApp - Original floorplan vectorization tool
+ */
+function FloorplanApp() {
   const darkMode = useAppStore((state) => state.darkMode);
 
   return (
